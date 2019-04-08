@@ -3,12 +3,22 @@
 
 ## <a name="toc"></a> 目录
 
-- [winform可编辑ListView](src/cs/EditListView)
+- [winform可编辑ListView](src/cs/EditableListView.cs) 使用 [例子](#EditListView)
+- [C#执行cmd命令](src/cs/ShellManager.cs)
 - [片段](#snippet)
 
 
 
-<a id="#snippet">获取进程内存</a>
+
+## <a id="#EditListView">可编辑ListView</a>
+新增SubItemClick事件:
+```
+listView.StartEditing(Editors[e.SubItem], e.Item, e.SubItem);
+```
+其中Editors需要是数组(每个列类型不同,拖动到ListView上,修改Visible为false).
+
+## <a id="#snippet">获取进程内存</a>
+
 ```
 /// <summary>
 /// 获取进程内存
