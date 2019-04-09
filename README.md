@@ -54,6 +54,23 @@ foreach (IConfigurationSection item in root.GetChildren())
 }
 var r= root["root"];
 ```
+skill：两种方式读取
+```c#
+var defaultcon = Configuration.GetConnectionString("DefaultConnection");
+var devcon = Configuration["ConnectionStrings:DevConnection"];
+```
+json文件：
+
+```json
+{
+  "Data": "LineZero",
+  "ConnectionStrings": {
+    "DefaultConnection": "数据库1",
+    "DevConnection": "数据库2"
+  }
+}
+```
+
 
 [⬆︎返回目录](#toc)
 
