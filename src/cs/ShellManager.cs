@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MonitorConfiguration
+namespace Util
 {
     public static class ShellManager
     {
@@ -11,6 +11,10 @@ namespace MonitorConfiguration
         public static void AsyncImmediateRunCmd(string cmdLine, System.Diagnostics.DataReceivedEventHandler dataReceived, System.Diagnostics.DataReceivedEventHandler errorReceived)
         {
             RunCmd(null, new string[] { cmdLine }, true, true, null, dataReceived, errorReceived);
+        }
+        public static void Execute(string filename,string aruments=null,bool isAdmin=false)
+        {
+            ShellExecuteCmd(isAdmin ? "RunAs" : "", filename, aruments,null,false,false,null,null,null);
         }
         #endregion
         #region 第二层封装
@@ -83,6 +87,5 @@ namespace MonitorConfiguration
             }
             return text;
         }
-
     }
 }
