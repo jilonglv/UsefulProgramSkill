@@ -72,15 +72,14 @@ namespace Util
                             proc.StandardInput.WriteLine(line);
                         }
                     }
+                    if (isAysnc)
+                    {
+                        proc.BeginOutputReadLine();
+                        proc.BeginErrorReadLine();
+                    }
+                    else
+                        text = proc.StandardOutput.ReadToEnd();
                 }
-
-                if (isAysnc)
-                {
-                    proc.BeginOutputReadLine();
-                    proc.BeginErrorReadLine();
-                }
-                else
-                    text = proc.StandardOutput.ReadToEnd();
 
                 if (isWaitForExit)
                     proc.WaitForExit();
