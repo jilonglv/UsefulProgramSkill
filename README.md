@@ -23,6 +23,8 @@
 - [开机启动项](#Run)
 - [获取进程内存](#getMemorySize)
 - [使用配置扩展](#microExt)
+- [自动加载x86、x64（C++、C#）](##loadx64x86)
+- [混合编程](##mixedprogram)
 
 ## <a id="#cmdCall">C#执行cmd命令</a>
 
@@ -30,13 +32,13 @@
 
 ProcessStartInfo startInfo = new ProcessStartInfo(fileName)
 {
-Arguments = arguments,
-WorkingDirectory = Path.GetDirectoryName(fileName),
-CreateNoWindow = true,
-UseShellExecute = false,
-RedirectStandardOutput = false,
-RedirectStandardError = false,
-Verb= "RunAs"//管理员身份时，设定该属性值
+    Arguments = arguments,
+    WorkingDirectory = Path.GetDirectoryName(fileName),
+    CreateNoWindow = true,
+    UseShellExecute = false,
+    RedirectStandardOutput = false,
+    RedirectStandardError = false,
+    Verb= "RunAs"//管理员身份时，设定该属性值
 };
 
 Process.Start(startInfo)
@@ -138,6 +140,68 @@ json文件：
 }
 ```
 
+## <a id="#loadx64x86">加载x64、x86</a>
+
+### 加载C# x86 、x64 dll解决方案
+
+如果有C#版本有x64和x86时，可以编译两个版本，把其中一个dll修改名称即可。
+*场景：*有一个dll使用了pinvoke(即DllImport)调用api，可动态进行程序是x86还是x64进行动态加载；
+*实践：*本人使用了ioc（autofac）进行加载，在加载失败时进行指定dll加载即可：
+
+```C#
+
+var currentDomain = AppDomain.CurrentDomain;
+var location = Assembly.GetExecutingAssembly().Location;
+var assemblyDir = Path.GetDirectoryName(location);
+if (assemblyDir != null)
+{
+	currentDomain.AssemblyResolve += (sender, arg) =>
+    {//autofac 加载64版本时，会触发解析失败，运行下面代码进行加载指定的dll
+        //默认版本为(Assembly name).dll，64版本为(Assembly name)x64.dll
+        if (arg.Name.StartsWith("(Assembly name)", StringComparison.OrdinalIgnoreCase))
+        {
+            string fileName = Path.Combine(assemblyDir, string.Format("(Assembly name){0}.dll", (IntPtr.Size == 4) ? "" : "x64"));
+            return Assembly.LoadFile(fileName);
+        }
+        return null;
+	};
+}
+```
+### 加载C++ x86、x64 dll解决方案
+按位数将dll放置不同的文件夹，使用api SetDllDirectory进行加载即可 [NativeLibraryHandle.cs](src\cs\NativeLibraryHandle.cs)
+
+主函数LoadDlls加载指定的dll即可：
+
+```c#
+
+static void LoadDlls()
+{
+    NativeLibraryHandle.SetDllFloder();
+    LoadDll("libuv.dll");
+}
+static void LoadDll(string filename)
+{
+    try
+    {
+        nativeLibraries.Add(new NativeLibraryHandle(filename));
+    }
+    catch (Exception ex)
+    {
+    }
+}
+```
+
+[privateBinPath的使用](https://www.cnblogs.com/zhesong/p/pbpcf.html)
+
+## <a id="#mixedprogram">混合编程</a>
+```c#
+//将8字节转为日期
+byte[] val=new byte[8];
+DateTime.FromBinary(BitConverter.ToInt64(val, 0));
+```
+[C#与C++类型互转](https://www.jianshu.com/p/d3ac316104f8)	
+
+[p/invoke封送处理](<https://docs.microsoft.com/zh-cn/dotnet/framework/interop/default-marshaling-for-arrays?view=netframework-4.7.2>) 
 
 [⬆︎返回目录](#toc)
 
